@@ -2,6 +2,7 @@ package com.tonghu.removeallbackgroundapp;
 
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -26,10 +27,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private ListView listView;
     final List<ResolveInfo> runningResolveInfo = new ArrayList<>();
+    private PackageManager mPackageManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mPackageManager = getPackageManager();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,13 +99,30 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public boolean isSystemApp(String packageName) {
+        try {
+            // Get packageinfo for target application
+            PackageInfo targetPkgInfo = mPackageManager.getPackageInfo(
+                    packageName, PackageManager.GET_SIGNATURES);
+            // Get packageinfo for system package
+            PackageInfo sys = mPackageManager.getPackageInfo(
+                    "android", PackageManager.GET_SIGNATURES);
+            // Match both packageinfo for there signatures
+            return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
+                    .equals(targetPkgInfo.signatures[0]));
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     private void getData() {
         runningResolveInfo.clear();
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         final List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities(mainIntent, 0);
         for (int i = 0; i < pkgAppsList.size(); i++) {
-            if (isPackageRunning(pkgAppsList.get(i).activityInfo.packageName)) {
+            String packageName = pkgAppsList.get(i).activityInfo.packageName;
+            if (isPackageRunning(packageName) && !isSystemApp(packageName)) {
                 runningResolveInfo.add(pkgAppsList.get(i));
             }
         }
@@ -121,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
 
     public int findPIDbyPackageName(String packagename) {
         int result = -1;
-
         if (am != null) {
             for (ActivityManager.RunningAppProcessInfo pi : am.getRunningAppProcesses()){
                 if (pi.processName.equalsIgnoreCase(packagename)) {
