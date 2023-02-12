@@ -1,9 +1,7 @@
 package com.tonghu.removeallbackgroundapp;
 
-import static com.tonghu.removeallbackgroundapp.util.AppUtils.isPackageRunning;
 import static com.tonghu.removeallbackgroundapp.util.AppUtils.isSystemApp;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -19,6 +17,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private PackageManager mPackageManager;
     private List<IAppInfo> appInfoList = new ArrayList<>();
     private RecyclerView.Adapter<Holder> adapter;
+    private ActivityResultLauncher<Intent> deleteLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +46,9 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         rv = findViewById(R.id.rv);
-
-        updateRunningPackages();
+        deleteLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            updateInstalledPackage();
+        });
 
         adapter = new RecyclerView.Adapter<Holder>() {
             @NonNull
@@ -62,12 +66,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("test", "name: " + appInfo.name());
 
                 holder.itemView.setOnClickListener(v -> {
+                    Log.i("test", "click item: " + appInfo);
                     IAppInfo itemAtPosition = appInfoList.get(position);
                     String packageName = itemAtPosition.packageName();
                     Uri packageUri = Uri.parse("package:" + packageName);
                     Intent uninstallIntent =
-                            new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageUri);
-                    startActivityForResult(uninstallIntent, 0);
+                            new Intent(Intent.ACTION_DELETE, packageUri);
+                    deleteLauncher.launch(uninstallIntent);
                 });
             }
 
@@ -97,24 +102,10 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-
-    private void updateRunningPackages() {
-//        runningResolveInfo.clear();
-//        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-//        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-//        final List<ResolveInfo> pkgAppsList = getPackageManager().queryIntentActivities(mainIntent, 0);
-//        for (int i = 0; i < pkgAppsList.size(); i++) {
-//            String packageName = pkgAppsList.get(i).activityInfo.packageName;
-//            if (!isSystemApp(this, packageName)) {
-//                runningResolveInfo.add(pkgAppsList.get(i));
-//            }
-//        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        updateRunningPackages();
+        updateInstalledPackage();
     }
 
     @Override
@@ -180,10 +171,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Drawable getIcon(Context context) {
             try {
-                return context.getPackageManager().getApplicationIcon(getPackageName());
+                return context.getPackageManager().getApplicationIcon(packageName);
             } catch (PackageManager.NameNotFoundException e) {
                 return null;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "AppInfo{" +
+                    "packageName='" + packageName + '\'' +
+                    ", name='" + name + '\'' +
+                    '}';
         }
     }
 }
