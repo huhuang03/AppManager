@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$USER_HOME$/Developer/source/RemoveAllBackGroundApp/RemoveAllBackGroundApp.iml" filepath="$USER_HOME$/Developer/source/RemoveAllBackGroundApp/RemoveAllBackGroundApp.iml" />
-      <module fileurl="file://$USER_HOME$/Developer/source/RemoveAllBackGroundApp/app/app.iml" filepath="$USER_HOME$/Developer/source/RemoveAllBackGroundApp/app/app.iml" />
-    </modules>
-  </component>
-</project>
