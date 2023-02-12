@@ -2,6 +2,7 @@ package com.tonghu.removeallbackgroundapp.util;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
@@ -11,13 +12,16 @@ public class AppUtils {
     public static boolean isSystemApp(Context context, String packageName) {
         try {
             PackageManager pm = context.getPackageManager();
-            // Get packageinfo for target application
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, 0);
+            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return true;
+            }
+
             PackageInfo targetPkgInfo = pm.getPackageInfo(
                     packageName, PackageManager.GET_SIGNATURES);
-            // Get packageinfo for system package
+
             PackageInfo sys = pm.getPackageInfo(
                     "android", PackageManager.GET_SIGNATURES);
-            // Match both packageinfo for there signatures
             return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
                     .equals(targetPkgInfo.signatures[0]));
         } catch (PackageManager.NameNotFoundException e) {

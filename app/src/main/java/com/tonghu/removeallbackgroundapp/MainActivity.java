@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateInstalledPackage() {
+        appInfoList.clear();
         PackageManager pm = getPackageManager();
         List<PackageInfo> installedPackages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
         for (PackageInfo installedPackage : installedPackages) {
