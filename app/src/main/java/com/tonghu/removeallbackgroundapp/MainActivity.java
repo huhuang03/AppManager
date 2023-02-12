@@ -17,13 +17,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,21 +30,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView rv;
-    private PackageManager mPackageManager;
-    private List<IAppInfo> appInfoList = new ArrayList<>();
+    private final List<IAppInfo> appInfoList = new ArrayList<>();
     private RecyclerView.Adapter<Holder> adapter;
     private ActivityResultLauncher<Intent> deleteLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPackageManager = getPackageManager();
+        PackageManager mPackageManager = getPackageManager();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        rv = findViewById(R.id.rv);
+        RecyclerView rv = findViewById(R.id.rv);
         deleteLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             updateInstalledPackage();
         });
@@ -73,6 +70,12 @@ public class MainActivity extends AppCompatActivity {
                     Intent uninstallIntent =
                             new Intent(Intent.ACTION_DELETE, packageUri);
                     deleteLauncher.launch(uninstallIntent);
+                });
+                holder.itemView.setOnLongClickListener(v -> {
+                    PopupMenu popupMenu = new PopupMenu(v.getContext(), v);
+                    popupMenu.inflate(R.menu.menu_app);
+                    popupMenu.show();
+                    return true;
                 });
             }
 
@@ -112,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_app, menu);
         return true;
     }
 
