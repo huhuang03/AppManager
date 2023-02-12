@@ -13,8 +13,9 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <ListView
-        android:id="@+id/list"
+    <androidx.recyclerview.widget.RecyclerView
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:id="@+id/rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="match_parent"/>
 </RelativeLayout>
